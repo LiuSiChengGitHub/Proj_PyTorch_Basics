@@ -1,0 +1,18 @@
+name: pytorch_basics     # <--- 这就是环境的名字
+channels:
+  - pytorch
+  - nvidia
+  - defaults
+dependencies:
+  - python=3.9           # 指定 Python 版本
+  - pytorch=2.0.0        # 指定 PyTorch 框架
+  - torchvision=0.15.0
+  - pytorch-cuda=11.8    # 适配你的 3060 显卡
+  - numpy
+  - matplotlib
+  - jupyter              # 必须有这个才能跑 Notebook
+  - pandas
+  - pip
+  - pip:
+    - opencv-python
+    - tensorboard

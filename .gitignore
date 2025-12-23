@@ -1,0 +1,25 @@
+# 忽略conda环境文件夹
+env/
+venv/
+.conda/
+
+# 忽略Python产生的垃圾文件
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# 忽略大数据集 (我们用相对路径引用外面的 datasets，但防万一)
+data/
+datasets/
+*.zip
+*.tar.gz
+
+# 忽略训练出来的大模型文件 (GitHub传不上去)
+*.pth
+*.pt
+*.onnx
+checkpoints/
+
+# 忽略IDE产生的配置
+.vscode/
+.idea/
