@@ -7,17 +7,23 @@
 ## 环境配置
 
 ### 1. 根据配置文件创建环境
+```bash
 conda env create -f environment.yml
+```
 
 ### 2. 激活环境
+```bash
 conda activate pytorch_basics
+```
 
 ## 项目结构
 
+```
 Proj_PyTorch_Basics/
     ├── environment.yml    # 环境配置文件
     ├── .gitignore         # Git 忽略规则
     └── README.md          # 项目说明书
+```
 
 ## 学习目标
 
