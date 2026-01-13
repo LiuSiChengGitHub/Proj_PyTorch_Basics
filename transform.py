@@ -67,7 +67,7 @@ def plot_compare(orig_img, trans_imgs, title_prefix="Transform"):
 
 # --- 2.1 准备数据 ---
 # 请确保此路径存在，或者修改为你自己的图片路径
-img_path = r'data\train\ants_image\5650366_e22b7e1065.jpg' 
+img_path = r'data\train\bees_image\16838648_415acd9e3f.jpg' 
 try:
     img_pil = load_image(img_path)
 except Exception as e:
@@ -115,6 +115,7 @@ transforms_dict = {
 }
 
 # 循环演示每个变换
+# 为了人眼看，还是在对img_pil这个原材料进行操作
 for name, transformer in transforms_dict.items():
     # 生成 3 张效果图来观察随机性
     demo_imgs = [transformer(img_pil) for _ in range(3)]
