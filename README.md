@@ -19,10 +19,48 @@ conda activate pytorch_basics
 ## 项目结构
 
 ```
-Proj_PyTorch_Basics/
-    ├── environment.yml    # 环境配置文件
-    ├── .gitignore         # Git 忽略规则
-    └── README.md          # 项目说明书
+
+Proj_Pytorch_Basics/
+
+├── src/                      # 核心可复用代码
+
+│   ├── data_modules/         # 数据集类定义
+
+│   │   ├── __init__.py
+
+│   │   ├── base.py           # MyData
+
+│   │   ├── classification.py # ClassificationDataset
+
+│   │   └── detection.py      # DetectionDataset
+
+│   └── transforms/           # 数据变换
+
+│       ├── __init__.py
+
+│       └── presets.py        # 预定义 transforms
+
+│
+
+├── examples/                 # 演示/测试代码
+
+│   ├── demo_classification.py
+
+│   ├── demo_detection.py
+
+│   ├── demo_transforms.py
+
+│   └── demo_dataloader.py
+
+│
+
+├── main.py                   # 主入口
+
+├── data/                     # 数据文件夹
+
+└── logs/                     # 日志文件夹
+
+
 ```
 
 ## 学习目标
