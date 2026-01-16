@@ -1,6 +1,7 @@
 # 用于测试卷积、池化等组件
 
 import torch
+
 from torch import nn
 
 class newNN(nn.Module):
