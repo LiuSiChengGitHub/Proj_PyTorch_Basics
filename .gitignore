@@ -23,3 +23,6 @@ checkpoints/
 # 忽略IDE产生的配置
 .vscode/
 .idea/
+
+# 忽略 TensorBoard 日志和训练记录
+logs/
