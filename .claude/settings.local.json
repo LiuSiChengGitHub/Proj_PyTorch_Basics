@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /d/01_Base/CodingSpace/Proj_Pytorch_Basics log --oneline -20)",
+      "Bash(git -C /d/01_Base/CodingSpace/Proj_Pytorch_Basics diff HEAD)",
+      "Bash(wc:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ]
+  }
+}

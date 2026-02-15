@@ -19,7 +19,7 @@ dataloader = DataLoader(dataset, batch_size=64)
 class Tudui(nn.Module): 
     def __init__(self): 
         super(Tudui, self).__init__() 
-        # 输入3通道(RGB)，输出6通道(特征图)，卷积核3x3
+        # 输入3通道（RGB），输出6通道(特征图)，卷积核3x3
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=6, kernel_size=3, stride=1, padding=0)
 
     def forward(self, x): 
@@ -44,7 +44,7 @@ for data in dataloader:
     writer.add_images("input", imgs, step)
     
     # 4. 维度重塑 (Reshape)
-    # 重点：TensorBoard 的 add_images 期望 3 通道图片。
+    # 重点：TensorBoard 的 add_images 期望改为 3 通道图片。
     # 我们将 6 通道输出 [64, 6, 30, 30] 拆解为 [128, 3, 30, 30] 才能正常显示。
     output = torch.reshape(output, (-1, 3, 30, 30))
     
