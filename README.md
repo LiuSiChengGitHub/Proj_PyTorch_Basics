@@ -1,172 +1,301 @@
-
 # PyTorch 基础学习项目
 
-## 简介
+## 项目简介
 
-这是一个系统性的 PyTorch 深度学习入门项目，目标是从零开始掌握 PyTorch 核心概念，最终完成一个完整的图像分类模型训练流程。项目采用模块化设计，将可复用代码（数据集、变换、模型）封装在 `src/` 中，学习过程中的演示脚本放在 `examples/` 中。
+这是一个围绕图像任务逐步学习 PyTorch 的入门项目，目标是从零开始掌握 Tensor、Dataset、Transform、DataLoader、常见神经网络层、CNN 结构以及后续训练评估流程。
 
-## 硬件与环境
+项目采用“边学边拆分”的方式组织：
+- `src/` 放可复用核心模块，面向后续正式训练
+- `examples/` 放阶段性实验脚本，面向单个知识点验证
+- `main.py` 负责把 Dataset、Transform、DataLoader 串起来
+- `train.py` 和 `src/models/simple_cnn.py` 预留给下一阶段的完整训练链路
+
+当前项目同时服务两条学习线：
+- 蚂蚁 / 蜜蜂分类与 YOLO 标注数据：帮助理解真实项目的数据组织方式
+- CIFAR-10：帮助理解 DataLoader、Conv2d、MaxPool2d 这类通用层操作
+
+## 环境与依赖
 
 | 项目 | 版本 |
 |------|------|
 | GPU | NVIDIA GeForce RTX 3060 |
 | CUDA | 11.8 |
-| PyTorch | 2.0.0 + torchvision 0.15.0 |
+| PyTorch | 2.0.0 |
+| torchvision | 0.15.0 |
 | Python | 3.9 |
-| 其他依赖 | OpenCV 4.8, NumPy, Matplotlib, TensorBoard 2.13, Jupyter |
+| 其他依赖 | OpenCV 4.8、NumPy、Matplotlib、TensorBoard、Jupyter |
 
 ```bash
-# 创建并激活环境
 conda env create -f environment.yml
 conda activate pytorch_basics
 ```
 
-## 学习目标与完成进度
+## 项目目标
 
-| # | 目标 | 状态 | 对应文件 |
-|---|------|------|----------|
-| 1 | 掌握 PyTorch Tensor 操作与神经网络前向传播 | 已完成 | `examples/test.py` |
-| 2 | 理解 Dataset 和 DataLoader 机制 | 已完成 | `src/data_modules/`, `examples/demo_classification.py`, `examples/demo_dataloader.py` |
-| 3 | 学会数据增强（transforms） | 已完成 | `src/transforms/`, `examples/demo_transforms.py` |
-| 4 | 理解 nn.Module 与卷积层 | 已完成 | `examples/nn_conv2d.py`, `examples/study_nn_layers.py` |
-| 5 | 理解目标检测数据格式（YOLO） | 已完成 | `src/data_modules/detection.py`, `examples/demo_detection.py` |
-| 6 | 定义 CNN 分类模型 | **待完成** | `src/models/simple_cnn.py`（空文件） |
-| 7 | 完成完整训练循环（训练+验证+保存模型） | **待完成** | `train.py`（空文件） |
-| 8 | 模型评估与推理 | **待完成** | — |
+项目的总目标是完成一条完整的 PyTorch 学习闭环：
+
+1. 理解 Tensor 和前向传播
+2. 理解 Dataset / DataLoader 的职责分工
+3. 学会图像 Transform 与训练集、验证集的不同策略
+4. 理解 `nn.Module`、`Conv2d`、`MaxPool2d`、激活函数等常见层
+5. 搭建一个简单 CNN 分类模型
+6. 完成训练、验证、保存模型
+7. 进行评估与推理
+
+## 当前学习进度
+
+### 已完成
+
+| 阶段 | 状态 | 对应内容 |
+|------|------|----------|
+| PyTorch 环境验证 | 已完成 | 环境准备与基础运行 |
+| Tensor 与前向传播 | 已完成 | `examples/test.py` |
+| 自定义 Dataset | 已完成 | `src/data_modules/`、`examples/demo_classification.py`、`examples/demo_detection.py` |
+| Transform 数据处理 | 已完成 | `src/transforms/`、`examples/demo_transforms.py` |
+| DataLoader 使用 | 已完成 | `examples/demo_dataloader.py`、`main.py` |
+| `nn.Module` 基础 | 已完成 | `examples/study_nn_layers.py` |
+| `nn.Conv2d` | 已完成 | `examples/nn_conv2d.py` |
+| `nn.MaxPool2d` | 已完成当前练习 | `examples/nn_maxpool2d.py` |
+
+### 当前所处阶段
+
+你已经从“小土堆教程前半段的数据部分”推进到了“常见神经网络层”阶段。
+
+结合项目代码和学习笔记，当前更准确的位置是：
+- 小土堆教程中，环境、Dataset、Transform、DataLoader 这条主线已完成
+- 在项目实战里，又继续补到了 `nn.Module`、`Conv2d`、`MaxPool2d`
+- 下一节适合进入“神经网络 - 非线性激活”
+
+### 待完成
+
+| 阶段 | 状态 | 文件 |
+|------|------|------|
+| 定义 CNN 分类模型 | 待完成 | `src/models/simple_cnn.py` |
+| 完整训练循环 | 待完成 | `train.py` |
+| 模型评估与推理 | 待完成 | 尚未创建独立脚本 |
 
 ## 项目结构
 
-```
+```text
 Proj_Pytorch_Basics/
-│
-├── src/                            # 核心可复用模块
-│   ├── __init__.py                 # 懒加载入口
-│   │
-│   ├── data_modules/               # 数据集类定义
+├── src/                          # 核心可复用模块
+│   ├── __init__.py               # 懒加载入口
+│   ├── data_modules/             # Dataset 定义
 │   │   ├── __init__.py
-│   │   ├── base.py                 # MyData — 基于 PIL 的分类数据集，支持 transform
-│   │   ├── classification.py       # ClassificationDataset — 基于 OpenCV 的分类数据集
-│   │   └── detection.py            # DetectionDataset — YOLO 格式目标检测数据集
-│   │
-│   ├── transforms/                 # 数据变换
+│   │   ├── base.py               # MyData：PIL 分类数据集，支持 transform
+│   │   ├── classification.py     # ClassificationDataset：OpenCV 分类数据集
+│   │   └── detection.py          # DetectionDataset：YOLO 检测数据集
+│   ├── transforms/
 │   │   ├── __init__.py
-│   │   └── presets.py              # 预定义 train/val transform 管线及可视化工具
-│   │
-│   └── models/                     # 模型定义（待实现）
+│   │   └── presets.py            # train/val transform 与可视化工具
+│   └── models/
 │       ├── __init__.py
-│       └── simple_cnn.py           # CNN 分类网络（待实现）
-│
-├── examples/                       # 学习演示脚本
-│   ├── test.py                     # 基础神经网络前向传播（NumPy 手写 + PyTorch）
-│   ├── demo_classification.py      # ClassificationDataset 用法演示
-│   ├── demo_detection.py           # DetectionDataset 用法演示
-│   ├── demo_dataloader.py          # DataLoader + TensorBoard 完整流程演示
-│   ├── demo_transforms.py          # 各类 transform 效果可视化
-│   ├── nn_conv2d.py                # Conv2d 卷积层 + CIFAR-10 特征图可视化
-│   └── study_nn_layers.py          # 最简 nn.Module 子类测试
-│
-├── main.py                         # 主入口：加载 hymenoptera 数据集 + DataLoader 示例
-├── train.py                        # 训练脚本入口（待实现）
-│
-├── data/                           # 自定义蚂蚁/蜜蜂数据集
-│   ├── train/
-│   │   ├── ants_image/             # 蚂蚁训练图片
-│   │   ├── ants_label/             # 蚂蚁 YOLO 格式标注
-│   │   ├── bees_image/             # 蜜蜂训练图片
-│   │   └── bees_label/             # 蜜蜂 YOLO 格式标注
-│   └── val/
-│       ├── ants/                   # 蚂蚁验证图片
-│       └── bees/                   # 蜜蜂验证图片
-│
-├── hymenoptera_data/               # 另一份蚂蚁/蜜蜂分类数据集（ImageFolder 格式）
-│   ├── train/
-│   └── val/
-│
-├── datasets/                       # 下载的公开数据集
-│   └── cifar-10-python.tar.gz      # CIFAR-10（~90MB）
-│
-├── environment.yml                 # Conda 环境配置
-└── .gitignore
+│       └── simple_cnn.py         # 预留：CNN 模型定义
+├── examples/                     # 知识点演示脚本
+│   ├── test.py
+│   ├── demo_classification.py
+│   ├── demo_detection.py
+│   ├── demo_dataloader.py
+│   ├── demo_transforms.py
+│   ├── study_nn_layers.py
+│   ├── nn_conv2d.py
+│   └── nn_maxpool2d.py
+├── main.py                       # Dataset + Transform + DataLoader 串联示例
+├── train.py                      # 预留：训练入口
+├── data/                         # 自定义蚂蚁/蜜蜂数据（含 YOLO 标注）
+├── hymenoptera_data/             # ImageFolder 格式分类数据
+├── logs/                         # TensorBoard 日志
+├── environment.yml               # Conda 环境配置
+└── README.md
 ```
 
-## 各模块功能说明
+## 重要数据与路径
 
-### `src/data_modules/` — 数据集
+| 数据 / 目录 | 说明 | 当前路径约定 |
+|------------|------|-------------|
+| `hymenoptera_data/` | 蚂蚁 / 蜜蜂分类数据集 | 项目内 |
+| `data/` | 蚂蚁 / 蜜蜂检测数据与 YOLO 标注 | 项目内 |
+| CIFAR-10 | 用于 DataLoader、Conv2d、MaxPool2d 学习 | 项目外同级目录 `../datasets` |
+| `logs/` | TensorBoard 日志输出目录 | 项目内 |
 
-- **`base.py` (MyData)**：基于 PIL 的图像分类 Dataset。通过目录名自动映射标签（`"ants"→0, "bees"→1`），支持传入 transform。供 `main.py` 使用。
-- **`classification.py` (ClassificationDataset)**：基于 OpenCV 读取图片的分类 Dataset，返回 `(numpy array, label_str)`。
-- **`detection.py` (DetectionDataset)**：目标检测 Dataset，图片目录和标注目录分离，读取 YOLO 格式 `.txt` 标注文件，能处理缺失标注。
+说明：
+- 当前项目里很多 CIFAR-10 示例使用相对路径 `../datasets`
+- 对应实际位置是项目同级目录 `D:\Base\CodingSpace\datasets`
+- 公开数据集不建议直接提交到仓库中，适合放在仓库外部并通过相对路径引用
 
-### `src/transforms/` — 数据变换
+## `src` 和 `examples` 的联系与区别
 
-- **`presets.py`**：
-  - `train_transform`：训练用增强管线 — Resize(256) → RandomCrop(224) → RandomHorizontalFlip → RandomRotation(15) → ColorJitter → ToTensor → Normalize（ImageNet 均值/标准差）
-  - `val_transform`：验证用管线 — Resize(256) → CenterCrop(224) → ToTensor → Normalize
-  - `load_image()`：安全图片加载（带校验）
-  - `plot_compare()`：原图 vs 变换后对比可视化
+### `src` 的角色：可复用核心逻辑
 
-### `src/models/` — 模型（待实现）
+`src/` 更像“工具箱”或“正式工程代码”。
 
-- **`simple_cnn.py`**：计划实现一个简单的 CNN 分类网络。
+这里放的是后续训练脚本会真正复用的模块：
+- `src/data_modules/base.py` 中的 `MyData`：正式训练更适合使用的分类 Dataset
+- `src/data_modules/classification.py`：用于理解 Dataset 基本结构的简化版本
+- `src/data_modules/detection.py`：用于理解检测任务的数据读取方式
+- `src/transforms/presets.py`：封装训练集 / 验证集的 Transform 管线
+- `src/__init__.py` 与 `src/data_modules/__init__.py`：使用懒加载，避免无关依赖被提前导入
 
-### `examples/` — 学习演示
+### `examples` 的角色：阶段性练习与验证
 
-| 脚本 | 学习内容 | 用到的工具 |
-|------|---------|-----------|
-| `test.py` | 基本前向传播、sigmoid、3 层网络 | NumPy, PyTorch |
-| `demo_classification.py` | 分类数据集加载与可视化 | ClassificationDataset, Matplotlib |
-| `demo_detection.py` | 检测数据集加载与可视化 | DetectionDataset, Matplotlib |
-| `demo_dataloader.py` | DataLoader 参数（batch_size, shuffle, drop_last）、2 epoch 模拟训练 | CIFAR-10, DataLoader, TensorBoard |
-| `demo_transforms.py` | 各种 transform 效果对比 | transforms, TensorBoard |
-| `nn_conv2d.py` | Conv2d 卷积层原理、特征图可视化 | CIFAR-10, nn.Conv2d, TensorBoard |
-| `study_nn_layers.py` | 最简 nn.Module 子类写法 | nn.Module |
+`examples/` 更像“练兵场”或“单知识点实验脚本”。
 
-## 工作流
+它们的特点是：
+- 每个脚本只解决一个学习问题
+- 可以单独运行，便于观察现象
+- 不追求完整训练流程，而是强调概念验证
 
-项目按以下学习路径递进推进：
+### 二者之间的关系
 
+两者不是重复，而是分工不同：
+- `examples/demo_classification.py` 调用 `src.data_modules.ClassificationDataset`
+- `examples/demo_detection.py` 调用 `src.data_modules.DetectionDataset`
+- `examples/demo_transforms.py` 调用 `src.transforms` 里的工具函数和预设管线
+- `main.py` 调用 `src.data_modules.MyData`，把核心模块串起来
+- `examples/nn_conv2d.py` 与 `examples/nn_maxpool2d.py` 当前更偏“层级实验”，主要围绕 CIFAR-10 观察输入输出变化，还没有沉淀到 `src/models/` 中
+
+可以把它理解为：
+- `src/` 是以后要复用的积木
+- `examples/` 是你学习这些积木时做的实验记录
+
+## 核心模块说明
+
+### `src/data_modules/`
+
+项目里一共有 3 个数据集类，对应不同学习阶段和任务：
+
+| 类名 | 文件 | 读图方式 | 返回值 | 作用 |
+|------|------|---------|--------|------|
+| `MyData` | `src/data_modules/base.py` | PIL | `(image_tensor, label_tensor)` | 正式分类训练版本 |
+| `ClassificationDataset` | `src/data_modules/classification.py` | OpenCV | `(numpy_image, label_str)` | 学习 Dataset 基本原理 |
+| `DetectionDataset` | `src/data_modules/detection.py` | OpenCV | `(numpy_image, yolo_label_text)` | 学习检测数据格式 |
+
+这里体现了明显的学习迭代：
+- 先写一个简单的分类数据集理解 `__init__`、`__getitem__`、`__len__`
+- 再写一个更规范的 `MyData` 版本，用于后续 transform 和训练
+- 再拓展到检测任务，理解“图片 + 标注文件分离”的数据组织方式
+
+### `src/transforms/`
+
+`src/transforms/presets.py` 提供了：
+- `train_transform`：训练用增强流程
+- `val_transform`：验证用固定流程
+- `load_image()`：安全读取图片
+- `plot_compare()`：原图与变换结果对比
+
+这里沉淀出的核心认识是：
+- 训练集需要随机增强，提升泛化能力
+- 验证集需要固定处理，保证评估公平
+- `ToTensor()` 会把维度从 `(H, W, C)` 转成 `(C, H, W)`
+
+### `src/models/`
+
+`src/models/simple_cnn.py` 目前还是空文件，它对应项目接下来的重点：
+- 把已经学过的 `Conv2d`、`MaxPool2d`、激活函数、全连接层真正组装成 CNN
+- 完成从“学层”到“搭模型”的过渡
+
+## `examples` 学习脚本说明
+
+| 脚本 | 作用 | 当前定位 |
+|------|------|----------|
+| `examples/test.py` | 用 NumPy 手写前向传播 | Tensor 与网络计算起点 |
+| `examples/demo_classification.py` | 演示分类 Dataset 的读取 | 自定义 Dataset 入门 |
+| `examples/demo_detection.py` | 演示 YOLO 检测数据读取 | 检测数据格式入门 |
+| `examples/demo_transforms.py` | 演示图像变换与可视化 | Transform 入门 |
+| `examples/demo_dataloader.py` | 演示批量加载、shuffle、drop_last | DataLoader 入门 |
+| `examples/study_nn_layers.py` | 最小 `nn.Module` 模板 | 神经网络层入门 |
+| `examples/nn_conv2d.py` | 观察卷积层输出尺寸与特征图 | Conv2d 入门 |
+| `examples/nn_maxpool2d.py` | 观察池化层输出尺寸与局部最大值 | MaxPool2d 入门 |
+
+建议学习顺序：
+
+```text
+test.py
+-> demo_classification.py / demo_detection.py
+-> demo_transforms.py
+-> demo_dataloader.py
+-> study_nn_layers.py
+-> nn_conv2d.py
+-> nn_maxpool2d.py
+-> 非线性激活
+-> simple_cnn.py
+-> train.py
 ```
-1. 基础概念          test.py
-   NumPy 手写前向传播、理解 Tensor 运算
-         │
-         ▼
-2. 数据加载          src/data_modules/ + demo_classification.py + demo_detection.py
-   自定义 Dataset、__getitem__/__len__、分类与检测两种数据格式
-         │
-         ▼
-3. 数据增强          src/transforms/ + demo_transforms.py
-   transform 管线、训练/验证不同策略、TensorBoard 可视化
-         │
-         ▼
-4. DataLoader        demo_dataloader.py + main.py
-   批量加载、shuffle、多进程、与 TensorBoard 结合
-         │
-         ▼
-5. 神经网络层        nn_conv2d.py + study_nn_layers.py
-   nn.Module 子类化、Conv2d 参数与特征图
-         │
-         ▼
-6. 模型定义          src/models/simple_cnn.py  ← 【下一步】
-   搭建完整 CNN 分类网络
-         │
-         ▼
-7. 训练循环          train.py  ← 【待实现】
-   loss 函数、优化器、训练/验证循环、模型保存与加载
-         │
-         ▼
-8. 评估与推理        ← 【待实现】
-   准确率、混淆矩阵、单张图片推理
-```
 
-## 数据集
+## 当前阶段的学习笔记提炼
 
-| 数据集 | 格式 | 用途 | 位置 |
-|--------|------|------|------|
-| Hymenoptera（蚂蚁/蜜蜂） | ImageFolder | 分类训练主数据集 | `hymenoptera_data/`, `data/` |
-| CIFAR-10 | torchvision 内置 | DataLoader 和 Conv2d 演示 | `datasets/` |
+### 1. 工程结构上的收获
 
-## 接下来要做的事
+- 已经理解为什么要把项目拆成 `src`、`examples`、`main.py`
+- 已经掌握 `__init__.py` 的包作用，以及懒加载的基本思路
+- 已经意识到数据集、日志、公开下载数据不应随意提交进仓库
 
-1. **定义 CNN 模型** — 在 `src/models/simple_cnn.py` 中实现一个简单的卷积神经网络（如 Conv→ReLU→Pool→FC 结构），用于蚂蚁/蜜蜂二分类或 CIFAR-10 十分类。
-2. **实现训练脚本** — 在 `train.py` 中编写完整的训练循环：损失函数（CrossEntropyLoss）、优化器（SGD/Adam）、逐 epoch 训练与验证、TensorBoard 记录 loss/accuracy 曲线、模型权重保存。
-3. **模型评估与推理** — 加载保存的模型权重，计算测试集准确率，可视化预测结果。
+### 2. Dataset 上的收获
+
+- 掌握了 `__init__`、`__getitem__`、`__len__` 的职责划分
+- 理解了标签映射的重要性：模型训练使用数字标签，不直接使用字符串
+- 理解了 `convert('RGB')` 的必要性，避免灰度图或透明通道带来维度错误
+
+### 3. Transform 上的收获
+
+- 理解 `Compose` 按顺序执行
+- 理解训练集与验证集的 transform 不能完全相同
+- 理解 `ToTensor()` 会改变数值范围和维度顺序
+
+### 4. DataLoader 上的收获
+
+- 理解 Dataset 输出单样本，DataLoader 输出 batch
+- 理解批处理后形状会变成 `(B, C, H, W)`
+- 理解 Windows 环境下常用 `num_workers=0`
+- 理解 `shuffle=True` 主要用于训练集
+- 理解 `drop_last` 的典型使用场景
+
+### 5. 神经网络层上的收获
+
+- 已经建立 `nn.Module` 的最小模板概念：继承、定义层、实现 `forward`
+- 已经观察过 `Conv2d` 会改变空间尺寸，也可以改变通道数
+- 已经观察过 `MaxPool2d` 主要作用在空间维度，通常不改变通道数
+- 当前正从“会看 shape 变化”过渡到“能自己手推输出 shape”
+
+## 已掌握的避坑与调试经验
+
+你目前已经积累了比较实用的一批调试经验：
+
+- `FileNotFoundError`：优先检查相对路径、反斜杠转义和 `os.path.exists`
+- `RuntimeError: Expected 4-dimensional input`：先检查是否缺少 batch 维度，必要时用 `unsqueeze(0)`
+- `AttributeError: 'NoneType' object is not callable`：检查 Dataset 初始化时是否漏传 `transform`
+- 导入路径报错：优先从项目根目录启动脚本
+- Windows 多进程数据加载异常：先把 `num_workers` 设为 0
+
+## 下一步建议
+
+### 最近一节
+
+如果 `nn_maxpool2d.py` 里关于参数、shape 和概念解释都能独立讲清楚，那么可以进入下一节：
+- 神经网络 - 非线性激活
+
+### 进入下一节前，最好确认自己能做到
+
+1. 看到一个输入 shape，能手推池化后的输出 shape
+2. 能解释为什么池化通常不改变通道数
+3. 能区分卷积和池化在 CNN 中的职责
+4. 能把 `Conv2d -> ReLU -> MaxPool2d` 视为一个常见组合，而不是三个孤立概念
+
+### 再往后
+
+建议的推进顺序是：
+- 学习 ReLU 等非线性激活
+- 在 `src/models/simple_cnn.py` 中实现简单 CNN
+- 在 `train.py` 中完成训练与验证循环
+- 增加模型评估与单图推理脚本
+
+## 总结
+
+这个项目已经不再只是“能跑几个 PyTorch 小例子”，而是在逐步沉淀成一个有清晰结构的学习型工程。
+
+你当前的真实进度可以概括为：
+- 数据读取与处理主线已完成
+- 常见神经网络层已经学到 `Conv2d` 和 `MaxPool2d`
+- 下一步进入非线性激活，并准备过渡到完整 CNN 结构
+
+也就是说，当前最关键的任务已经不是“继续堆更多零散脚本”，而是把已经学过的层真正组合起来，进入模型定义阶段。
