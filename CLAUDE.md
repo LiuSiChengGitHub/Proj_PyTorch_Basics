@@ -42,18 +42,19 @@ tensorboard --logdir=runs
 
 - **`src/transforms/presets.py`** - Predefined augmentation pipelines (`train_transform`, `val_transform`) using ImageNet normalization stats, plus `load_image()` and `plot_compare()` utilities
 
-- **`src/models/simple_cnn.py`** - CNN model (placeholder, not yet implemented)
+- **`src/models/simple_cnn.py`** - `SimpleCNN`: 3×Conv+ReLU+Pool feature extractor + 2×Linear classifier, targets CIFAR-10 (3×32×32 → 10 classes). Core parameters left as TODO exercises for the learner to fill in.
 
 - **Lazy loading pattern**: `__init__.py` files use `__getattr__` for dynamic imports so OpenCV is not a hard dependency
 
 ### `examples/` - Learning Demonstrations
 
-Progressive examples from basic tensor ops (`test.py`) through datasets, transforms, conv layers, to nn.Module usage. Several examples write TensorBoard logs for visualization.
+Progressive examples from basic tensor ops (`test.py`) through datasets, transforms, conv layers, nn.Module usage, to data augmentation experiments. Several examples write TensorBoard logs for visualization.
 
 ### Entry Points
 
 - `main.py` - Loads hymenoptera dataset with DataLoader
-- `train.py` - Training script (placeholder, not yet implemented)
+- `train.py` - Full training script with framework written; core learning points (device, loss fn, optimizer, 5-step train loop, eval mode) left as TODO exercises
+- `examples/train_with_aug.py` - Augmentation experiment: baseline vs augmented transform comparison; augmented pipeline left as TODO
 
 ### Datasets
 

@@ -55,16 +55,22 @@ conda activate pytorch_basics
 | DataLoader 使用 | 已完成 | `examples/demo_dataloader.py`、`main.py` |
 | `nn.Module` 基础 | 已完成 | `examples/study_nn_layers.py` |
 | `nn.Conv2d` | 已完成 | `examples/nn_conv2d.py` |
-| `nn.MaxPool2d` | 已完成当前练习 | `examples/nn_maxpool2d.py` |
+| `nn.MaxPool2d` | 已完成 | `examples/nn_maxpool2d.py` |
+| 非线性激活（ReLU / Sigmoid） | 已完成 | `examples/nn_relu.py` |
+| `nn.Linear` 全连接层 | 已完成 | `examples/nn_linear.py` |
+| `nn.Sequential` | 已完成 | `examples/nn_sequential.py` |
+| 损失函数与反向传播 | 已完成 | `examples/nn_loss.py` |
+| 优化器（SGD / Adam） | 已完成 | `examples/nn_optimizer.py` |
 
 ### 当前所处阶段
 
-你已经从“小土堆教程前半段的数据部分”推进到了“常见神经网络层”阶段。
+你已经完成了小土堆教程中”神经网络核心组件”这一完整主线。
 
 结合项目代码和学习笔记，当前更准确的位置是：
 - 小土堆教程中，环境、Dataset、Transform、DataLoader 这条主线已完成
-- 在项目实战里，又继续补到了 `nn.Module`、`Conv2d`、`MaxPool2d`
-- 下一节适合进入“神经网络 - 非线性激活”
+- 常见神经网络层（Conv2d、MaxPool2d、ReLU、Linear）已全部学完
+- 训练基础三件套（损失函数、反向传播、优化器）已完成
+- 下一步适合进入”完整模型定义 + 训练循环”阶段
 
 ### 待完成
 
@@ -99,7 +105,12 @@ Proj_Pytorch_Basics/
 │   ├── demo_transforms.py
 │   ├── study_nn_layers.py
 │   ├── nn_conv2d.py
-│   └── nn_maxpool2d.py
+│   ├── nn_maxpool2d.py
+│   ├── nn_relu.py
+│   ├── nn_linear.py
+│   ├── nn_sequential.py
+│   ├── nn_loss.py
+│   └── nn_optimizer.py
 ├── main.py                       # Dataset + Transform + DataLoader 串联示例
 ├── train.py                      # 预留：训练入口
 ├── data/                         # 自定义蚂蚁/蜜蜂数据（含 YOLO 标注）
@@ -206,6 +217,11 @@ Proj_Pytorch_Basics/
 | `examples/study_nn_layers.py` | 最小 `nn.Module` 模板 | 神经网络层入门 |
 | `examples/nn_conv2d.py` | 观察卷积层输出尺寸与特征图 | Conv2d 入门 |
 | `examples/nn_maxpool2d.py` | 观察池化层输出尺寸与局部最大值 | MaxPool2d 入门 |
+| `examples/nn_relu.py` | 演示 ReLU / Sigmoid 对张量的变换效果 | 非线性激活入门 |
+| `examples/nn_linear.py` | 演示全连接层输入输出与 Flatten 配合 | Linear 全连接层入门 |
+| `examples/nn_sequential.py` | 用 Sequential 搭建完整 CNN，验证 shape | Sequential 容器入门 |
+| `examples/nn_loss.py` | 演示 CrossEntropyLoss、MSELoss 和 backward | 损失函数与反向传播入门 |
+| `examples/nn_optimizer.py` | 演示 SGD / Adam 完整训练三步 | 优化器入门 |
 
 建议学习顺序：
 
@@ -217,9 +233,13 @@ test.py
 -> study_nn_layers.py
 -> nn_conv2d.py
 -> nn_maxpool2d.py
--> 非线性激活
--> simple_cnn.py
--> train.py
+-> nn_relu.py
+-> nn_linear.py
+-> nn_sequential.py
+-> nn_loss.py
+-> nn_optimizer.py
+-> simple_cnn.py（待完成）
+-> train.py（待完成）
 ```
 
 ## 当前阶段的学习笔记提炼
@@ -255,7 +275,18 @@ test.py
 - 已经建立 `nn.Module` 的最小模板概念：继承、定义层、实现 `forward`
 - 已经观察过 `Conv2d` 会改变空间尺寸，也可以改变通道数
 - 已经观察过 `MaxPool2d` 主要作用在空间维度，通常不改变通道数
-- 当前正从“会看 shape 变化”过渡到“能自己手推输出 shape”
+- 理解 `ReLU(x) = max(0, x)`，负值截断，正值保持；Sigmoid 把输入压缩到 (0, 1)
+- 理解 `nn.Linear(in, out)` 等价于 `y = xW^T + b`，权重形状为 (out, in)
+- 理解 `nn.Flatten` 把 (B, C, H, W) 展平为 (B, C*H*W)，方便接全连接层
+- 理解 `nn.Sequential` 可以把多个层按顺序组合，适合串行结构
+
+### 6. 损失函数与训练流程上的收获
+
+- 理解 `CrossEntropyLoss` 内部已包含 Softmax，不需要手动再加
+- 理解 `MSELoss` 计算预测值与目标值之差的均方误差
+- 理解 `loss.backward()` 后，每个参数的 `.grad` 属性被填充为梯度
+- 掌握完整训练三步：`optimizer.zero_grad()` -> `loss.backward()` -> `optimizer.step()`
+- 理解 `zero_grad()` 的必要性：防止梯度在多次 backward 之间累积
 
 ## 已掌握的避坑与调试经验
 
@@ -269,25 +300,28 @@ test.py
 
 ## 下一步建议
 
-### 最近一节
+### 当前阶段小结
 
-如果 `nn_maxpool2d.py` 里关于参数、shape 和概念解释都能独立讲清楚，那么可以进入下一节：
-- 神经网络 - 非线性激活
+神经网络核心组件阶段已全部完成：
+- Conv2d、MaxPool2d、ReLU、Linear、Sequential
+- 损失函数（CrossEntropyLoss、MSELoss）
+- 反向传播（loss.backward）
+- 优化器（SGD、Adam）
 
-### 进入下一节前，最好确认自己能做到
+### 进入下一阶段前，最好确认自己能做到
 
-1. 看到一个输入 shape，能手推池化后的输出 shape
-2. 能解释为什么池化通常不改变通道数
-3. 能区分卷积和池化在 CNN 中的职责
-4. 能把 `Conv2d -> ReLU -> MaxPool2d` 视为一个常见组合，而不是三个孤立概念
+1. 能用 `nn.Sequential` 独立搭出一个 CNN 模型并验证 shape 正确
+2. 能解释训练三步（zero_grad / backward / step）每一步的作用
+3. 能解释为什么 CrossEntropyLoss 不需要提前手动 softmax
+4. 能区分"梯度计算"（backward）和"参数更新"（step）是两个独立步骤
 
-### 再往后
+### 下一步建议
 
 建议的推进顺序是：
-- 学习 ReLU 等非线性激活
-- 在 `src/models/simple_cnn.py` 中实现简单 CNN
-- 在 `train.py` 中完成训练与验证循环
-- 增加模型评估与单图推理脚本
+- 在 `src/models/simple_cnn.py` 中实现完整 CNN 分类模型
+- 在 `train.py` 中完成完整训练与验证循环（含 epoch 循环、accuracy 统计）
+- 增加模型保存与加载（`torch.save` / `torch.load`）
+- 增加单图推理脚本
 
 ## 总结
 
@@ -295,7 +329,8 @@ test.py
 
 你当前的真实进度可以概括为：
 - 数据读取与处理主线已完成
-- 常见神经网络层已经学到 `Conv2d` 和 `MaxPool2d`
-- 下一步进入非线性激活，并准备过渡到完整 CNN 结构
+- 神经网络核心组件（Conv2d、MaxPool2d、ReLU、Linear、Sequential）已全部学完
+- 训练基础三件套（损失函数、反向传播、优化器）已完成
+- 下一步是把这些组件真正组合起来，完成完整的训练闭环
 
-也就是说，当前最关键的任务已经不是“继续堆更多零散脚本”，而是把已经学过的层真正组合起来，进入模型定义阶段。
+也就是说，当前最关键的任务已经不是”继续堆更多零散脚本”，而是进入 `src/models/simple_cnn.py` 和 `train.py`，完成一个可以跑通的完整训练流程。
