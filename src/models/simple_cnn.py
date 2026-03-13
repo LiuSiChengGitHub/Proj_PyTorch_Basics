@@ -37,7 +37,7 @@ class SimpleCNN(nn.Module):
             # TODO: 填写 Conv2d 参数
             # 输入: (B, 3, 32, 32) → 输出: (B, 32, 32, 32)
             # 提示: in_channels=3, out_channels=32, kernel_size=5, padding=?（要保持 H/W 不变）
-            nn.Conv2d(),  # TODO
+            nn.Conv2d(3,32,5,1,2)  # TODO
 
             # TODO: 在这里加 ReLU
 
