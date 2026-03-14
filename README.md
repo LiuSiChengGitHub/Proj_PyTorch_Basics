@@ -67,19 +67,20 @@ conda activate pytorch_basics
 
 ### 当前所处阶段
 
-PyTorch 基础训练链路已全部走通：
+PyTorch 基础训练链路已全部走通，并已补上迁移学习闭环：
 - 数据加载三件套（Dataset → Transform → DataLoader）已完成
 - 神经网络核心组件（Conv2d、MaxPool2d、ReLU、Linear、Sequential）已全部学完
 - 训练基础三件套（损失函数、反向传播、优化器）已完成
 - SimpleCNN 模型定义 + 完整训练循环 + 数据增强实验已完成
-- 下一步：迁移学习（ResNet18 微调）
+- ResNet18 迁移学习训练脚本已添加（`examples/train_transfer.py`）
+- 单图推理脚本已添加（`examples/predict_transfer.py`）
 
-### 待完成
+### 当前阶段成果
 
 | 阶段 | 状态 | 文件 |
 |------|------|------|
-| 迁移学习 | 待完成 | `examples/train_transfer.py` |
-| 模型评估与推理 | 待完成 | 尚未创建独立脚本 |
+| 迁移学习 | 已实现 | `examples/train_transfer.py` |
+| 模型评估与推理 | 已实现 | `examples/predict_transfer.py` |
 
 ## 项目结构
 
@@ -345,9 +346,9 @@ PyTorch 基础阶段已全部完成：
 ### 下一步建议
 
 建议的推进顺序是：
-- 迁移学习：用预训练 ResNet18 微调蚂蚁/蜜蜂分类（`examples/train_transfer.py`）
-- 模型评估与推理：加载保存的模型，对单张图片进行预测
-- 可视化：用 TensorBoard 记录训练曲线
+- 先运行迁移学习训练脚本：`examples/train_transfer.py`
+- 再运行单图推理脚本：`examples/predict_transfer.py`
+- 可选升级：用 TensorBoard 记录训练曲线
 - 完成以上后进入 **YOLO 缺陷检测项目**（学习路线的核心实战项目）
 
 ## 总结
@@ -355,4 +356,5 @@ PyTorch 基础阶段已全部完成：
 这个项目已经完成了从”零散学习”到”完整训练闭环”的跨越：
 - Phase 1 覆盖了从 Tensor 基础到完整训练循环的全部核心知识
 - 代码组织清晰：`src/` 存放可复用模块，`examples/` 存放学习实验
-- 下一步进入迁移学习阶段，利用预训练模型解决实际分类任务
+- 现在已经进入迁移学习实战阶段，并具备训练 + 推理的最小闭环
+
