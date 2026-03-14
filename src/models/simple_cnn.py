@@ -82,7 +82,7 @@ class SimpleCNN(nn.Module):
             # TODO: 填写 Linear 的 in_features
             # 提示: 需要手推 feature 最后的输出 shape，然后算 C*H*W
             nn.Linear(1024, 64),  # TODO: in_features = ?
-
+            # REVIEW: 实践中两个 Linear 之间通常加 ReLU，防止两层线性等价于一层；入门阶段不加也能跑通
             nn.Linear(64, num_classes),
         )
 

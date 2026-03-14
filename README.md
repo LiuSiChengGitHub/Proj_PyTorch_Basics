@@ -8,7 +8,7 @@
 - `src/` 放可复用核心模块，面向后续正式训练
 - `examples/` 放阶段性实验脚本，面向单个知识点验证
 - `main.py` 负责把 Dataset、Transform、DataLoader 串起来
-- `train.py` 和 `src/models/simple_cnn.py` 预留给下一阶段的完整训练链路
+- `train.py` 完整训练循环（CIFAR-10），`src/models/simple_cnn.py` 定义 CNN 模型
 
 当前项目同时服务两条学习线：
 - 蚂蚁 / 蜜蜂分类与 YOLO 标注数据：帮助理解真实项目的数据组织方式
@@ -61,23 +61,24 @@ conda activate pytorch_basics
 | `nn.Sequential` | 已完成 | `examples/nn_sequential.py` |
 | 损失函数与反向传播 | 已完成 | `examples/nn_loss.py` |
 | 优化器（SGD / Adam） | 已完成 | `examples/nn_optimizer.py` |
+| SimpleCNN 模型定义 | 已完成 | `src/models/simple_cnn.py` |
+| 完整训练循环 | 已完成 | `train.py` |
+| 数据增强对比实验 | 已完成 | `examples/train_with_aug.py` |
 
 ### 当前所处阶段
 
-你已经完成了小土堆教程中”神经网络核心组件”这一完整主线。
-
-结合项目代码和学习笔记，当前更准确的位置是：
-- 小土堆教程中，环境、Dataset、Transform、DataLoader 这条主线已完成
-- 常见神经网络层（Conv2d、MaxPool2d、ReLU、Linear）已全部学完
+PyTorch 基础训练链路已全部走通：
+- 数据加载三件套（Dataset → Transform → DataLoader）已完成
+- 神经网络核心组件（Conv2d、MaxPool2d、ReLU、Linear、Sequential）已全部学完
 - 训练基础三件套（损失函数、反向传播、优化器）已完成
-- 下一步适合进入”完整模型定义 + 训练循环”阶段
+- SimpleCNN 模型定义 + 完整训练循环 + 数据增强实验已完成
+- 下一步：迁移学习（ResNet18 微调）
 
 ### 待完成
 
 | 阶段 | 状态 | 文件 |
 |------|------|------|
-| 定义 CNN 分类模型 | 待完成 | `src/models/simple_cnn.py` |
-| 完整训练循环 | 待完成 | `train.py` |
+| 迁移学习 | 待完成 | `examples/train_transfer.py` |
 | 模型评估与推理 | 待完成 | 尚未创建独立脚本 |
 
 ## 项目结构
@@ -96,7 +97,7 @@ Proj_Pytorch_Basics/
 │   │   └── presets.py            # train/val transform 与可视化工具
 │   └── models/
 │       ├── __init__.py
-│       └── simple_cnn.py         # 预留：CNN 模型定义
+│       └── simple_cnn.py         # SimpleCNN：3层Conv+Pool + 2层Linear，适配 CIFAR-10
 ├── examples/                     # 知识点演示脚本
 │   ├── test.py
 │   ├── demo_classification.py
@@ -110,9 +111,13 @@ Proj_Pytorch_Basics/
 │   ├── nn_linear.py
 │   ├── nn_sequential.py
 │   ├── nn_loss.py
-│   └── nn_optimizer.py
+│   ├── nn_optimizer.py
+│   └── train_with_aug.py
 ├── main.py                       # Dataset + Transform + DataLoader 串联示例
-├── train.py                      # 预留：训练入口
+├── train.py                      # CIFAR-10 完整训练脚本（SimpleCNN）
+├── docs/                         # 学习笔记
+│   ├── phase1_notes.md           # Phase 1 核心学习笔记（精简版）
+│   └── pytorch_basics_I.md       # Phase 1 完整笔记（进度 + 结构 + 学习总结）
 ├── data/                         # 自定义蚂蚁/蜜蜂数据（含 YOLO 标注）
 ├── hymenoptera_data/             # ImageFolder 格式分类数据
 ├── logs/                         # TensorBoard 日志
@@ -201,9 +206,11 @@ Proj_Pytorch_Basics/
 
 ### `src/models/`
 
-`src/models/simple_cnn.py` 目前还是空文件，它对应项目接下来的重点：
-- 把已经学过的 `Conv2d`、`MaxPool2d`、激活函数、全连接层真正组装成 CNN
-- 完成从“学层”到“搭模型”的过渡
+`src/models/simple_cnn.py` 实现了 `SimpleCNN` 分类模型：
+- 特征提取：3 组 Conv2d → ReLU → MaxPool2d，通道 3→32→32→64，空间 32→16→8→4
+- 分类器：Flatten → Linear(1024, 64) → Linear(64, 10)
+- 适配 CIFAR-10：输入 (B, 3, 32, 32) → 输出 (B, 10)
+- 使用 `__init__.py` 懒加载，`from src.models import SimpleCNN` 即可使用
 
 ## `examples` 学习脚本说明
 
@@ -222,6 +229,7 @@ Proj_Pytorch_Basics/
 | `examples/nn_sequential.py` | 用 Sequential 搭建完整 CNN，验证 shape | Sequential 容器入门 |
 | `examples/nn_loss.py` | 演示 CrossEntropyLoss、MSELoss 和 backward | 损失函数与反向传播入门 |
 | `examples/nn_optimizer.py` | 演示 SGD / Adam 完整训练三步 | 优化器入门 |
+| `examples/train_with_aug.py` | 基线 vs 增强 transform 的训练对比实验 | 数据增强实战 |
 
 建议学习顺序：
 
@@ -238,8 +246,9 @@ test.py
 -> nn_sequential.py
 -> nn_loss.py
 -> nn_optimizer.py
--> simple_cnn.py（待完成）
--> train.py（待完成）
+-> simple_cnn.py
+-> train.py
+-> train_with_aug.py
 ```
 
 ## 当前阶段的学习笔记提炼
@@ -288,6 +297,22 @@ test.py
 - 掌握完整训练三步：`optimizer.zero_grad()` -> `loss.backward()` -> `optimizer.step()`
 - 理解 `zero_grad()` 的必要性：防止梯度在多次 backward 之间累积
 
+### 7. 完整训练循环上的收获
+
+- 掌握训练 5 步口诀：zero_grad → forward → loss → backward → step
+- 理解 device 管理：model、images、labels 都需要 `.to(device)`
+- 理解 `model.eval()` 与 `torch.no_grad()` 的区别和各自作用
+- 理解 eval 后必须切回 `model.train()`
+- 掌握模型保存：`torch.save(model.state_dict(), path)`
+
+### 8. 数据增强上的收获
+
+- 理解训练集增强的目的是扩大数据多样性，提升泛化能力
+- 理解测试集不能做随机增强，否则评估结果不可复现
+- 掌握 CIFAR-10 经典增强组合：RandomCrop(32, padding=4) + RandomHorizontalFlip
+- 理解不同数据集有不同的 Normalize 统计值（CIFAR-10 vs ImageNet）
+- 理解实验对比需要控制变量，只改变待测试的因素
+
 ## 已掌握的避坑与调试经验
 
 你目前已经积累了比较实用的一批调试经验：
@@ -302,35 +327,32 @@ test.py
 
 ### 当前阶段小结
 
-神经网络核心组件阶段已全部完成：
-- Conv2d、MaxPool2d、ReLU、Linear、Sequential
-- 损失函数（CrossEntropyLoss、MSELoss）
-- 反向传播（loss.backward）
-- 优化器（SGD、Adam）
+PyTorch 基础阶段已全部完成：
+- 数据加载三件套（Dataset → Transform → DataLoader）
+- 神经网络核心组件（Conv2d、MaxPool2d、ReLU、Linear、Sequential）
+- 训练基础三件套（损失函数、反向传播、优化器）
+- SimpleCNN 模型定义 + 完整训练循环 + 数据增强实验
+- 详细学习笔记见 `docs/pytorch_basics_I.md`（完整版）和 `docs/phase1_notes.md`（精简版）
 
 ### 进入下一阶段前，最好确认自己能做到
 
-1. 能用 `nn.Sequential` 独立搭出一个 CNN 模型并验证 shape 正确
-2. 能解释训练三步（zero_grad / backward / step）每一步的作用
-3. 能解释为什么 CrossEntropyLoss 不需要提前手动 softmax
-4. 能区分"梯度计算"（backward）和"参数更新"（step）是两个独立步骤
+1. 能独立搭出一个 CNN 模型并手推 shape 变化链
+2. 能解释训练 5 步（zero_grad / forward / loss / backward / step）每一步的作用
+3. 能解释 `model.eval()` 和 `torch.no_grad()` 的区别
+4. 能解释为什么 CrossEntropyLoss 不需要提前手动 softmax
+5. 能设计合理的数据增强策略并解释为什么测试集不增强
 
 ### 下一步建议
 
 建议的推进顺序是：
-- 在 `src/models/simple_cnn.py` 中实现完整 CNN 分类模型
-- 在 `train.py` 中完成完整训练与验证循环（含 epoch 循环、accuracy 统计）
-- 增加模型保存与加载（`torch.save` / `torch.load`）
-- 增加单图推理脚本
+- 迁移学习：用预训练 ResNet18 微调蚂蚁/蜜蜂分类（`examples/train_transfer.py`）
+- 模型评估与推理：加载保存的模型，对单张图片进行预测
+- 可视化：用 TensorBoard 记录训练曲线
+- 完成以上后进入 **YOLO 缺陷检测项目**（学习路线的核心实战项目）
 
 ## 总结
 
-这个项目已经不再只是“能跑几个 PyTorch 小例子”，而是在逐步沉淀成一个有清晰结构的学习型工程。
-
-你当前的真实进度可以概括为：
-- 数据读取与处理主线已完成
-- 神经网络核心组件（Conv2d、MaxPool2d、ReLU、Linear、Sequential）已全部学完
-- 训练基础三件套（损失函数、反向传播、优化器）已完成
-- 下一步是把这些组件真正组合起来，完成完整的训练闭环
-
-也就是说，当前最关键的任务已经不是”继续堆更多零散脚本”，而是进入 `src/models/simple_cnn.py` 和 `train.py`，完成一个可以跑通的完整训练流程。
+这个项目已经完成了从”零散学习”到”完整训练闭环”的跨越：
+- Phase 1 覆盖了从 Tensor 基础到完整训练循环的全部核心知识
+- 代码组织清晰：`src/` 存放可复用模块，`examples/` 存放学习实验
+- 下一步进入迁移学习阶段，利用预训练模型解决实际分类任务

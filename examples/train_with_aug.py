@@ -43,6 +43,8 @@ DATASET_ROOT = os.path.join("..", "datasets")
 # =============================================================================
 
 # 基线 transform：只做 ToTensor，不做任何增强
+# REVIEW: 基线没有 Normalize 而增强组有，对比时增强组的提升可能部分来自标准化而非增强本身；
+#         更严谨的做法是基线也加 Normalize，只控制"增强"这一个变量
 baseline_transform = transforms.Compose([
     transforms.ToTensor(),
 ])

@@ -26,3 +26,7 @@ checkpoints/
 
 # 忽略 TensorBoard 日志和训练记录
 logs/
+runs/
+
+# 忽略训练保存的模型目录
+saved_models/

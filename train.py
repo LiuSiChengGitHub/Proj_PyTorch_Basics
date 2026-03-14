@@ -122,10 +122,7 @@ def train():
 
     # TODO: 选择优化器，传入模型参数和学习率
     # 提示: torch.optim.???(model.parameters(), lr=LEARNING_RATE)
-    optimizer = torch.optim.Adam(
-    model.parameters(),
-    lr=LEARNING_RATE
-    ) # TODO
+    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)  # TODO
 
     print(f"模型参数量: {sum(p.numel() for p in model.parameters()):,}")
     print(f"损失函数: {loss_fn}")
