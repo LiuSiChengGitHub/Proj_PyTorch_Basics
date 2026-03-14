@@ -68,21 +68,25 @@ def evaluate(model, test_loader, device):
 
     # TODO: 切换到评估模式
     # 提示: model.???()
+    model.eval()
 
     # TODO: 关闭梯度计算（省显存、加速，测试时不需要梯度）
     # 提示: with torch.???():
-    for imgs, labels in test_loader:
-        imgs = imgs.to(device)
-        labels = labels.to(device)
+    
+    with torch.no_grad():
+        for imgs, labels in test_loader:
+            imgs = imgs.to(device)
+            labels = labels.to(device)
 
-        outputs = model(imgs)
-        # argmax 取预测类别
-        _, predicted = torch.max(outputs, dim=1)
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
+            outputs = model(imgs)
+            # argmax 取预测类别
+            _, predicted = torch.max(outputs, dim=1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
 
     # TODO: 切换回训练模式
     # 提示: model.???()
+    model.train()
 
     accuracy = correct / total
     return accuracy
@@ -95,7 +99,7 @@ def train():
     # =================================================================
     # TODO: 设置 device（优先用 GPU，没有则用 CPU）
     # 提示: torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    device = None  # TODO
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # TODO
 
     print(f"使用设备: {device}")
 
@@ -110,14 +114,18 @@ def train():
     model = SimpleCNN()
     # TODO: 把模型搬到 device 上
     # 提示: model.to(???)
+    model.to(device)
 
     # TODO: 选择损失函数（这是分类任务，用哪个？）
     # 提示: nn.???
-    loss_fn = None  # TODO
+    loss_fn = nn.CrossEntropyLoss()  # TODO
 
     # TODO: 选择优化器，传入模型参数和学习率
     # 提示: torch.optim.???(model.parameters(), lr=LEARNING_RATE)
-    optimizer = None  # TODO
+    optimizer = torch.optim.Adam(
+    model.parameters(),
+    lr=LEARNING_RATE
+    ) # TODO
 
     print(f"模型参数量: {sum(p.numel() for p in model.parameters()):,}")
     print(f"损失函数: {loss_fn}")
@@ -137,21 +145,21 @@ def train():
 
             # TODO: 完成训练的 5 个核心步骤（写出正确顺序）
             # 提示: 回忆 nn_optimizer.py 里学的三步口诀，再加上 forward 和 loss 计算
-            #
+            
             # 第 1 步: 清除旧梯度
-            # ???
-            #
+            optimizer.zero_grad()
+            
             # 第 2 步: 前向传播
-            # outputs = ???
-            #
+            outputs = model(imgs)
+            
             # 第 3 步: 计算损失
-            # loss = ???
-            #
+            loss = loss_fn(outputs,labels)
+            
             # 第 4 步: 反向传播
-            # ???
-            #
+            loss.backward()
+            
             # 第 5 步: 更新参数
-            # ???
+            optimizer.step()
 
             running_loss += loss.item()
 

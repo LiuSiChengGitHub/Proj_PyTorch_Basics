@@ -37,37 +37,40 @@ class SimpleCNN(nn.Module):
             # TODO: 填写 Conv2d 参数
             # 输入: (B, 3, 32, 32) → 输出: (B, 32, 32, 32)
             # 提示: in_channels=3, out_channels=32, kernel_size=5, padding=?（要保持 H/W 不变）
-            nn.Conv2d(3,32,5,1,2)  # TODO
+            nn.Conv2d(in_channels=3, out_channels=32, kernel_size=5, stride=1, padding=2),  # TODO
 
             # TODO: 在这里加 ReLU
+            nn.ReLU(),
 
             # TODO: 填写 MaxPool2d 参数
             # 输入: (B, 32, 32, 32) → 输出: (B, 32, 16, 16)
             # 提示: kernel_size=2，H/W 减半
-            nn.MaxPool2d(),  # TODO
+            nn.MaxPool2d(kernel_size=2, stride=2),  # TODO
 
             # --- 第 2 组 ---
             # TODO: 填写 Conv2d 参数
             # 输入: (B, 32, 16, 16) → 输出: (B, 32, 16, 16)
-            nn.Conv2d(),  # TODO
+            nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, stride=1, padding=1),  # TODO
 
             # TODO: 在这里加 ReLU
+            nn.ReLU(),
 
             # TODO: 填写 MaxPool2d 参数
             # 输入: (B, 32, 16, 16) → 输出: (B, 32, 8, 8)
-            nn.MaxPool2d(),  # TODO
+            nn.MaxPool2d(kernel_size=2, stride=2),  # TODO
 
             # --- 第 3 组 ---
             # TODO: 填写 Conv2d 参数
             # 输入: (B, 32, 8, 8) → 输出: (B, 64, 8, 8)
             # 提示: 这一层 out_channels 变大了
-            nn.Conv2d(),  # TODO
+            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, stride=1, padding=1),  # TODO
 
             # TODO: 在这里加 ReLU
+            nn.ReLU(),
 
             # TODO: 填写 MaxPool2d 参数
             # 输入: (B, 64, 8, 8) → 输出: (B, 64, 4, 4)
-            nn.MaxPool2d(),  # TODO
+            nn.MaxPool2d(kernel_size=2, stride=2),  # TODO
         )
 
         # =====================================================================
@@ -78,14 +81,14 @@ class SimpleCNN(nn.Module):
             # 输入: (B, 64*4*4) = (B, 1024) → 输出: (B, 64)
             # TODO: 填写 Linear 的 in_features
             # 提示: 需要手推 feature 最后的输出 shape，然后算 C*H*W
-            nn.Linear(, 64),  # TODO: in_features = ?
+            nn.Linear(1024, 64),  # TODO: in_features = ?
 
             nn.Linear(64, num_classes),
         )
 
     def forward(self, x):
-        x = self.feature(x)
-        x = self.classifier(x)
+        x = self.feature(x)      # (B, 64, 4, 4)
+        x = self.classifier(x)   # (B, num_classes)
         return x
 
 
