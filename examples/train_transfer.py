@@ -105,6 +105,11 @@ def count_trainable_params(model):
     return sum(param.numel() for param in model.parameters() if param.requires_grad)
 
 
+def count_total_params(model):
+    """统计模型总参数量。"""
+    return sum(param.numel() for param in model.parameters())
+
+
 def train_one_epoch(model, dataloader, loss_fn, optimizer, device, print_shapes=False):
     """训练一个 epoch，返回平均 loss。"""
     model.train()
@@ -122,8 +127,12 @@ def train_one_epoch(model, dataloader, loss_fn, optimizer, device, print_shapes=
         optimizer.step()
 
         if print_shapes and step == 1:
-            print(f"首个 batch 输入 shape: {tuple(images.shape)}")
-            print(f"首个 batch 输出 shape: {tuple(outputs.shape)}")
+            if print_shapes and step == 1:
+                print(f"首个 batch 输入 min: {images.min().item():.4f}")
+                print(f"首个 batch 输入 max: {images.max().item():.4f}")
+                print(f"首个 batch 输入 shape: {tuple(images.shape)}")
+                print(f"首个 batch 输出 shape: {tuple(outputs.shape)}")
+
 
         batch_size = labels.size(0)
         total_loss += loss.item() * batch_size
@@ -195,11 +204,23 @@ def main():
     train_dataset, val_dataset, train_loader, val_loader = build_dataloaders()
     print(f"训练集样本数: {len(train_dataset)}")
     print(f"验证集样本数: {len(val_dataset)}")
-    print(f"类别映射: {train_dataset.class_to_idx}")
+
+    print(f"训练集样本数: {len(train_dataset)}")
+    print(f"验证集样本数: {len(val_dataset)}")
+
+    print(f"训练集类别列表: {train_dataset.classes}")
+    print(f"训练集 class_to_idx: {train_dataset.class_to_idx}")
+    print(f"验证集类别列表: {val_dataset.classes}")
+    print(f"验证集 class_to_idx: {val_dataset.class_to_idx}")
     print()
+
 
     try:
         model = build_model(num_classes=len(train_dataset.classes)).to(device)
+        print(model)
+        print("最后分类头 model.fc:")
+        print(model.fc)
+
     except Exception as exc:
         raise RuntimeError(
             "加载 ResNet18 预训练权重失败。"
@@ -231,9 +252,11 @@ def main():
 
         set_trainable_layers(model, stage["stage_key"])
         optimizer = build_optimizer(model, stage["lr"])
+        total_params = count_total_params(model)
         trainable_params = count_trainable_params(model)
 
         print(f"当前学习率: {stage['lr']}")
+        print(f"模型总参数量: {total_params:,}")
         print(f"当前可训练参数量: {trainable_params:,}")
         print()
 
