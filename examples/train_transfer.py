@@ -37,7 +37,9 @@ from src.transforms import train_transform, val_transform
 
 TRAIN_DIR = os.path.join("hymenoptera_data", "train")
 VAL_DIR = os.path.join("hymenoptera_data", "val")
-SAVE_PATH = os.path.join("saved_models", "resnet18_hymenoptera_best.pth")
+BEST_SAVE_PATH = os.path.join("saved_models", "resnet18_hymenoptera_best.pth")
+LAST_SAVE_PATH = os.path.join("saved_models", "resnet18_hymenoptera_last.pth")
+
 
 BATCH_SIZE = 16
 NUM_WORKERS = 0
@@ -127,11 +129,10 @@ def train_one_epoch(model, dataloader, loss_fn, optimizer, device, print_shapes=
         optimizer.step()
 
         if print_shapes and step == 1:
-            if print_shapes and step == 1:
-                print(f"首个 batch 输入 min: {images.min().item():.4f}")
-                print(f"首个 batch 输入 max: {images.max().item():.4f}")
-                print(f"首个 batch 输入 shape: {tuple(images.shape)}")
-                print(f"首个 batch 输出 shape: {tuple(outputs.shape)}")
+            print(f"首个 batch 输入 min: {images.min().item():.4f}")
+            print(f"首个 batch 输入 max: {images.max().item():.4f}")
+            print(f"首个 batch 输入 shape: {tuple(images.shape)}")
+            print(f"首个 batch 输出 shape: {tuple(outputs.shape)}")
 
 
         batch_size = labels.size(0)
@@ -205,9 +206,6 @@ def main():
     print(f"训练集样本数: {len(train_dataset)}")
     print(f"验证集样本数: {len(val_dataset)}")
 
-    print(f"训练集样本数: {len(train_dataset)}")
-    print(f"验证集样本数: {len(val_dataset)}")
-
     print(f"训练集类别列表: {train_dataset.classes}")
     print(f"训练集 class_to_idx: {train_dataset.class_to_idx}")
     print(f"验证集类别列表: {val_dataset.classes}")
@@ -217,7 +215,7 @@ def main():
 
     try:
         model = build_model(num_classes=len(train_dataset.classes)).to(device)
-        print(model)
+        # print(model)
         print("最后分类头 model.fc:")
         print(model.fc)
 
@@ -258,6 +256,7 @@ def main():
         print(f"当前学习率: {stage['lr']}")
         print(f"模型总参数量: {total_params:,}")
         print(f"当前可训练参数量: {trainable_params:,}")
+        print(f"本阶段训练轮数: {stage['epochs']}")
         print()
 
         for epoch in range(1, stage["epochs"] + 1):
@@ -271,26 +270,37 @@ def main():
             )
             val_loss, val_acc = evaluate(model, val_loader, loss_fn, device)
 
+            is_best = val_acc > best_val_acc
+
+            if is_best:
+                best_val_acc = val_acc
+                save_checkpoint(model, train_dataset.class_to_idx, best_val_acc, BEST_SAVE_PATH)
+
+            save_checkpoint(model, train_dataset.class_to_idx, best_val_acc, LAST_SAVE_PATH)
+
             print(
-                f"[{stage['name']}] "
-                f"Epoch {epoch}/{stage['epochs']} | "
-                f"train_loss={train_loss:.4f} | "
-                f"val_loss={val_loss:.4f} | "
-                f"val_acc={val_acc:.2%}"
+                f"阶段: {stage['name']} | "
+                f"Epoch: {epoch}/{stage['epochs']} | "
+                f"train_loss: {train_loss:.4f} | "
+                f"val_loss: {val_loss:.4f} | "
+                f"val_acc: {val_acc:.2%} | "
+                f"best_val_acc: {best_val_acc:.2%}"
             )
 
-            if val_acc > best_val_acc:
-                best_val_acc = val_acc
-                save_checkpoint(model, train_dataset.class_to_idx, best_val_acc, SAVE_PATH)
-                print(f"  >>> 保存新的最优模型: {SAVE_PATH}")
+            if is_best:
+                print(f"  [Saved best] {BEST_SAVE_PATH}")
+            print(f"  [Saved last] {LAST_SAVE_PATH}")
+            print()
 
+        print(f"阶段结束: {stage['name']}，共训练 {stage['epochs']} 个 epoch")
         print()
 
     print("=" * 70)
     print("训练完成")
     print("=" * 70)
     print(f"最佳验证集准确率: {best_val_acc:.2%}")
-    print(f"最优模型路径: {SAVE_PATH}")
+    print(f"最优模型路径: {BEST_SAVE_PATH}")
+    print(f"最新模型路径: {LAST_SAVE_PATH}")
     print_learning_checklist()
 
 
