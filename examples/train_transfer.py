@@ -102,6 +102,10 @@ def build_optimizer(model, lr):
     return torch.optim.Adam(trainable_params, lr=lr)
 
 
+def get_current_lr(optimizer):
+    return optimizer.param_groups[0]["lr"]
+
+
 def count_trainable_params(model):
     """统计当前可训练参数数量。"""
     return sum(param.numel() for param in model.parameters() if param.requires_grad)
@@ -110,6 +114,18 @@ def count_trainable_params(model):
 def count_total_params(model):
     """统计模型总参数量。"""
     return sum(param.numel() for param in model.parameters())
+
+
+def print_stage_status(stage_name, optimizer, trainable_params, total_params, best_val_acc):
+    print(f"Stage: {stage_name}")
+    print(f"Learning rate: {get_current_lr(optimizer):.6f}")
+    print(f"Trainable params: {trainable_params:,} / {total_params:,}")
+    print(f"Best accuracy so far: {best_val_acc:.2%}")
+    return
+    print(f"褰撳墠闃舵: {stage_name}")
+    print(f"褰撳墠瀛︿範鐜? {get_current_lr(optimizer):.6f}")
+    print(f"褰撳墠鍙缁冨弬鏁伴噺: {trainable_params:,} / {total_params:,}")
+    print(f"褰撳墠 best accuracy: {best_val_acc:.2%}")
 
 
 def train_one_epoch(model, dataloader, loss_fn, optimizer, device, print_shapes=False):
@@ -252,6 +268,13 @@ def main():
         optimizer = build_optimizer(model, stage["lr"])
         total_params = count_total_params(model)
         trainable_params = count_trainable_params(model)
+        print_stage_status(
+            stage_name=stage["name"],
+            optimizer=optimizer,
+            trainable_params=trainable_params,
+            total_params=total_params,
+            best_val_acc=best_val_acc,
+        )
 
         print(f"当前学习率: {stage['lr']}")
         print(f"模型总参数量: {total_params:,}")
@@ -281,6 +304,8 @@ def main():
             print(
                 f"阶段: {stage['name']} | "
                 f"Epoch: {epoch}/{stage['epochs']} | "
+                f"lr: {get_current_lr(optimizer):.6f} | "
+                f"trainable_params: {trainable_params:,} | "
                 f"train_loss: {train_loss:.4f} | "
                 f"val_loss: {val_loss:.4f} | "
                 f"val_acc: {val_acc:.2%} | "
