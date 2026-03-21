@@ -44,17 +44,21 @@ LAST_SAVE_PATH = os.path.join("saved_models", "resnet18_hymenoptera_last.pth")
 BATCH_SIZE = 16
 NUM_WORKERS = 0
 
-HEAD_EPOCHS = 3
+HEAD_EPOCHS = 5
 HEAD_LR = 1e-3
+# HEAD_LR = 5e-4
 
-FINETUNE_EPOCHS = 3
+FINETUNE_EPOCHS = 5
 FINETUNE_LR = 1e-4
+# FINETUNE_LR = 1e-5
 
 
 def build_dataloaders():
     """构建训练集和验证集 DataLoader。"""
     train_dataset = datasets.ImageFolder(TRAIN_DIR, transform=train_transform)
     val_dataset = datasets.ImageFolder(VAL_DIR, transform=val_transform)
+    # train_dataset = datasets.ImageFolder(TRAIN_DIR, transform=train_tf or train_transform)
+    # val_dataset = datasets.ImageFolder(VAL_DIR, transform=val_tf or val_transform)
 
     train_loader = DataLoader(
         train_dataset,
@@ -74,6 +78,7 @@ def build_dataloaders():
 def build_model(num_classes):
     """加载预训练 ResNet18 并替换最后的分类头。"""
     model = resnet18(weights=ResNet18_Weights.DEFAULT)
+    # model = resnet18(weights=None)
     in_features = model.fc.in_features
     model.fc = nn.Linear(in_features, num_classes)
     return model
@@ -88,6 +93,10 @@ def set_trainable_layers(model, stage):
         modules_to_train = [model.fc]
     elif stage == "finetune":
         modules_to_train = [model.layer4, model.fc]
+    elif stage == "full": # 解冻所有参数，全量微调
+      for param in model.parameters():
+          param.requires_grad = True
+      return  # 不需要走下面的 modules_to_train 循环
     else:
         raise ValueError(f"不支持的训练阶段: {stage}")
 
@@ -185,7 +194,7 @@ def evaluate(model, dataloader, loss_fn, device):
     return avg_loss, accuracy
 
 
-def save_checkpoint(model, class_to_idx, best_val_acc, save_path):
+def save_checkpoint(model, class_to_idx, best_val_acc, save_path,epoch=None, stage=None, optimizer=None):
     """保存最优模型和类别映射，方便后续推理。"""
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
     checkpoint = {
@@ -193,7 +202,11 @@ def save_checkpoint(model, class_to_idx, best_val_acc, save_path):
         "class_to_idx": class_to_idx,
         "best_val_acc": best_val_acc,
         "arch": "resnet18",
+        "epoch": epoch,
+        "stage": stage,
     }
+    if optimizer is not None:
+        checkpoint["optimizer_state_dict"] = optimizer.state_dict()
     torch.save(checkpoint, save_path)
 
 
@@ -257,6 +270,13 @@ def main():
             "epochs": FINETUNE_EPOCHS,
             "lr": FINETUNE_LR,
         },
+
+        # {
+        #   "name": "版本 C | 训练全模型",
+        #   "stage_key": "full",
+        #   "epochs": 5,
+        #   "lr": 1e-4,  # 全量微调通常用更小的学习率
+        # },
     ]
 
     for stage_index, stage in enumerate(stages):
@@ -297,9 +317,9 @@ def main():
 
             if is_best:
                 best_val_acc = val_acc
-                save_checkpoint(model, train_dataset.class_to_idx, best_val_acc, BEST_SAVE_PATH)
+                save_checkpoint(model, train_dataset.class_to_idx, best_val_acc, BEST_SAVE_PATH, epoch=epoch,stage=stage["stage_key"],optimizer=optimizer)
 
-            save_checkpoint(model, train_dataset.class_to_idx, best_val_acc, LAST_SAVE_PATH)
+            save_checkpoint(model, train_dataset.class_to_idx, best_val_acc, LAST_SAVE_PATH,epoch=epoch, stage=stage["stage_key"],optimizer=optimizer)
 
             print(
                 f"阶段: {stage['name']} | "

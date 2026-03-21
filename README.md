@@ -65,22 +65,25 @@ conda activate pytorch_basics
 | 完整训练循环 | 已完成 | `train.py` |
 | 数据增强对比实验 | 已完成 | `examples/train_with_aug.py` |
 
+| 迁移学习（ResNet18） | 已完成 | `examples/train_transfer.py` |
+| 单图/批量推理 | 已完成 | `examples/predict_transfer.py` |
+
 ### 当前所处阶段
 
-PyTorch 基础训练链路已全部走通，并已补上迁移学习闭环：
-- 数据加载三件套（Dataset → Transform → DataLoader）已完成
-- 神经网络核心组件（Conv2d、MaxPool2d、ReLU、Linear、Sequential）已全部学完
-- 训练基础三件套（损失函数、反向传播、优化器）已完成
-- SimpleCNN 模型定义 + 完整训练循环 + 数据增强实验已完成
-- ResNet18 迁移学习训练脚本已添加（`examples/train_transfer.py`）
-- 单图推理脚本已添加（`examples/predict_transfer.py`）
+PyTorch 基础阶段全部完成（Dataset → DataLoader → CNN → 训练循环 → 数据增强 → 迁移学习）。
 
-### 当前阶段成果
+完整链路：
+- 数据加载三件套（Dataset → Transform → DataLoader）
+- 神经网络核心组件（Conv2d、MaxPool2d、ReLU、Linear、Sequential）
+- 训练基础三件套（损失函数、反向传播、优化器）
+- SimpleCNN 模型定义 + 完整训练循环 + 数据增强实验
+- ResNet18 迁移学习（渐进解冻两阶段训练 + 单图推理）
 
-| 阶段 | 状态 | 文件 |
+### 待完成
+
+| 阶段 | 状态 | 说明 |
 |------|------|------|
-| 迁移学习 | 已实现 | `examples/train_transfer.py` |
-| 模型评估与推理 | 已实现 | `examples/predict_transfer.py` |
+| YOLO 缺陷检测项目 | 待启动 | NEU-DET 钢材缺陷检测，独立项目 |
 
 ## 项目结构
 
@@ -113,12 +116,17 @@ Proj_Pytorch_Basics/
 │   ├── nn_sequential.py
 │   ├── nn_loss.py
 │   ├── nn_optimizer.py
-│   └── train_with_aug.py
+│   ├── train_with_aug.py         # 数据增强对比实验（CIFAR-10）
+│   ├── train_transfer.py         # ResNet18 迁移学习训练
+│   └── predict_transfer.py       # 单图/文件夹推理
 ├── main.py                       # Dataset + Transform + DataLoader 串联示例
 ├── train.py                      # CIFAR-10 完整训练脚本（SimpleCNN）
+├── saved_models/                 # 训练保存的模型（.gitignore）
 ├── docs/                         # 学习笔记
-│   ├── phase1_notes.md           # Phase 1 核心学习笔记（精简版）
-│   └── pytorch_basics_I.md       # Phase 1 完整笔记（进度 + 结构 + 学习总结）
+│   ├── pytorch_basics_I-0314.md  # Phase 1 完整笔记（进度 + 结构 + 学习总结）
+│   ├── pytorch_basics_II_transfer_learning.md  # Phase 2 迁移学习笔记
+│   ├── resnet18_transfer_learning_plan.md      # 迁移学习学习方案
+│   └── yolo_defect_detection_plan.md           # YOLO 项目启动方案
 ├── data/                         # 自定义蚂蚁/蜜蜂数据（含 YOLO 标注）
 ├── hymenoptera_data/             # ImageFolder 格式分类数据
 ├── logs/                         # TensorBoard 日志
@@ -231,6 +239,8 @@ Proj_Pytorch_Basics/
 | `examples/nn_loss.py` | 演示 CrossEntropyLoss、MSELoss 和 backward | 损失函数与反向传播入门 |
 | `examples/nn_optimizer.py` | 演示 SGD / Adam 完整训练三步 | 优化器入门 |
 | `examples/train_with_aug.py` | 基线 vs 增强 transform 的训练对比实验 | 数据增强实战 |
+| `examples/train_transfer.py` | ResNet18 两阶段迁移学习训练 | 迁移学习训练 |
+| `examples/predict_transfer.py` | 单图/文件夹批量推理（top-k + 置信度） | 迁移学习推理 |
 
 建议学习顺序：
 
@@ -250,6 +260,8 @@ test.py
 -> simple_cnn.py
 -> train.py
 -> train_with_aug.py
+-> train_transfer.py
+-> predict_transfer.py
 ```
 
 ## 当前阶段的学习笔记提炼
@@ -343,18 +355,19 @@ PyTorch 基础阶段已全部完成：
 4. 能解释为什么 CrossEntropyLoss 不需要提前手动 softmax
 5. 能设计合理的数据增强策略并解释为什么测试集不增强
 
-### 下一步建议
+### 下一步
 
-建议的推进顺序是：
-- 先运行迁移学习训练脚本：`examples/train_transfer.py`
-- 再运行单图推理脚本：`examples/predict_transfer.py`
-- 可选升级：用 TensorBoard 记录训练曲线
-- 完成以上后进入 **YOLO 缺陷检测项目**（学习路线的核心实战项目）
+直接进入 **YOLO 缺陷检测项目**（学习路线核心实战项目）：
+- 数据集：NEU-DET 钢材表面缺陷（6 类缺陷，约 1800 张）
+- 模型：YOLOv8n
+- 目标：mAP@0.5 > 0.70，ONNX 导出 + 推理验证
+- 详细方案：`docs/yolo_defect_detection_plan.md`
 
 ## 总结
 
 这个项目已经完成了从”零散学习”到”完整训练闭环”的跨越：
 - Phase 1 覆盖了从 Tensor 基础到完整训练循环的全部核心知识
+- Phase 2 完成了 ResNet18 迁移学习（渐进解冻 + 推理 + 对比实验）
 - 代码组织清晰：`src/` 存放可复用模块，`examples/` 存放学习实验
-- 现在已经进入迁移学习实战阶段，并具备训练 + 推理的最小闭环
+- 学习笔记：`docs/pytorch_basics_I-0314.md`（Phase 1）、`docs/pytorch_basics_II_transfer_learning.md`（Phase 2）
 

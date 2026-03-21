@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A PyTorch deep learning basics project for learning core concepts through image classification. Phase 1 (Dataset → Transform → DataLoader → CNN → Training Loop → Data Augmentation) is complete. Phase 2 now has a first working implementation: ResNet18 transfer learning plus single-image inference.
+A PyTorch deep learning basics project for learning core concepts through image classification. Both Phase 1 and Phase 2 are complete. Next step: YOLO defect detection project (separate repo).
 
 Uses modular design with reusable components in `src/` and learning demonstrations in `examples/`.
 
@@ -72,10 +72,18 @@ Progressive examples from basic tensor ops (`test.py`) through datasets, transfo
 
 ### Documentation
 
-- `docs/pytorch_basics_I.md` - Phase 1 complete notes: progress tracking, project structure, learning summary (main reference)
-- `docs/phase1_notes.md` - Phase 1 concise learning notes (subset of the above)
+- `docs/pytorch_basics_I-0314.md` - Phase 1 complete notes: progress tracking, project structure, learning summary
+- `docs/pytorch_basics_II_transfer_learning.md` - Phase 2 transfer learning notes: concepts, experiments, interview prep
+- `docs/resnet18_transfer_learning_plan.md` - Transfer learning study plan and task checklist
+- `docs/yolo_defect_detection_plan.md` - YOLO defect detection project launch plan
 
 ## Current Progress
 
 - **Phase 1 (Complete)**: Tensor basics, Dataset/Transform/DataLoader, nn layers (Conv2d, MaxPool2d, ReLU, Linear, Sequential), loss functions, optimizers, SimpleCNN model, full training loop, data augmentation
-- **Phase 2 (Implemented v1)**: Transfer learning (ResNet18 fine-tuning), best-checkpoint saving, and single-image inference
+- **Phase 2 (Complete)**: Transfer learning (ResNet18 fine-tuning with progressive unfreezing), best/last checkpoint saving, single-image and batch inference, pretrained vs non-pretrained experiments, learning rate and stage strategy comparisons
+
+## Next Steps
+
+- **YOLO Project**: NEU-DET steel surface defect detection (separate repository)
+- **Tech stack**: ultralytics YOLOv8 + ONNX export + Python ONNX Runtime inference
+- **Target**: mAP@0.5 > 0.70, GitHub portfolio project, core resume project for CV positions
